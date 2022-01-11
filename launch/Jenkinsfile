@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    environment {
+        SERVICE_PORT = '8081'
+    }
+    stages {
+        stage('Pull from Docker Hub') {
+            steps {
+                sh 'docker pull femelloffm/go-calculator:1.0'
+            }
+        }
+        stage('Remove old container') {
+            when {
+                not {
+                    expression {
+                        return sh(returnStdout: true, script: 'docker ps -a -f name=go-calculator -q').trim() == ""
+                    }
+                }
+            }
+            steps {
+                sh 'docker stop go-calculator'
+                sh 'docker rm go-calculator'
+            }
+        }
+        stage('Run Docker container') {
+            steps {
+                sh 'docker run --name go-calculator -p ${SERVICE_PORT}:8080 -d femelloffm/go-calculator:1.0'
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build and push Docker image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'packer init ./bake/packer_config.pkr.hcl'
+                    sh "packer build --var docker_username=$DOCKER_USERNAME --var docker_password=$DOCKER_PASSWORD ./bake/packer_config.pkr.hcl"
+                }
+            }
+        }
+    }
+}
